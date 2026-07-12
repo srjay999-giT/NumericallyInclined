@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NumericallyInclined — Learn. Play. Master Every Quiz.</title>
+    <meta name="description"
+        content="NumericallyInclined — a premium educational platform to test your knowledge across multiple categories.">
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Playfair+Display:ital,wght@1,500&family=Poppins:wght@400;500;600;700;800;900&family=Kalam:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Theme Initialization (Prevents FOIT) -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+    <nav class="premium-navbar">
+        <header class="site-header">
+            <a href="index.html" class="brand-link">
+                <img src="assets/images/logo.png" alt="NumericallyInclined Logo" class="brand-logo">
+                <div class="brand-name" aria-label="NumericallyInclined">
+                    <span class="brand-numerically" aria-hidden="true">Numer<span class="orange-dot">ı</span>cally</span><span class="brand-inclined" aria-hidden="true">Incl<span class="orange-dot">ı</span>ned</span>
+                </div>
+            </a>
+        </header>
+
+        <div class="nav-links">
+            <a href="#home" class="premium-nav-link active" aria-label="Home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Home</span>
+            </a>
+            <a href="#categories" class="premium-nav-link" aria-label="Categories">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                <span>Categories</span>
+            </a>
+            <a href="#practice" class="premium-nav-link" aria-label="Practice">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <span>Practice</span>
+            </a>
+            <a href="#card-leaderboard" class="premium-nav-link" aria-label="Leaderboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <span>Leaderboard</span>
+            </a>
+        </div>
+
+        <div class="navbar-actions">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+        </div>
+    </nav>
+    <div id="home-view" class="view-section">
+        <main class="website-container">
+
+            <section id="home" class="hero-section premium-hero">
+                <div class="hero-bg-grid"></div>
+                <div class="premium-hero-inner">
+                    <div class="hero-copy">
+                        <span class="hero-badge">Math Practice, Made Fun</span>
+                        <div class="hero-quote-container">
+                            <p class="hero-quote">"The only way to learn mathematics is to do mathematics."</p>
+                            <p class="hero-quote-author">Paul Halmos</p>
+                        </div>
+                        <div class="hero-actions">
+                            <button id="hero-practice-btn" class="hero-primary-button" type="button"><i data-lucide="play" aria-hidden="true"></i> Start Practicing</button>
+                            <button id="hero-categories-btn" class="hero-secondary-button" type="button"><i data-lucide="book-open" aria-hidden="true"></i> Browse Categories</button>
+                        </div>
+                        <div class="hero-benefits" aria-label="Platform highlights">
+                            <span><i data-lucide="brain" aria-hidden="true"></i> 5000+ Questions</span>
+                            <span><i data-lucide="book-open" aria-hidden="true"></i> 3000+ Formulae</span>
+                            <span><i data-lucide="trophy" aria-hidden="true"></i> Daily Challenges</span>
+                            <span><i data-lucide="flame" aria-hidden="true"></i> Leaderboards</span>
+                        </div>
+                    </div>
+                    <div class="hero-media-card">
+                        <img src="assets/images/maths.jpg" alt="Student studying mathematics in front of a formula board">
+                        <span class="hero-media-badge"><i data-lucide="book-marked" aria-hidden="true"></i> 500+ Problems</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="landing-section platform-stats-section" aria-label="Platform statistics">
+                <div class="section-shell stat-cards">
+                    <article class="stat-card"><i data-lucide="circle-check-big" aria-hidden="true"></i><span class="stat-number" data-counter="5000" data-suffix="+">0</span><span>Questions Solved</span></article>
+                    <article class="stat-card"><i data-lucide="shapes" aria-hidden="true"></i><span class="stat-number" data-counter="32">0</span><span>Categories</span></article>
+                    <article class="stat-card"><i data-lucide="users" aria-hidden="true"></i><span class="stat-number" data-counter="1200" data-suffix="+">0</span><span>Daily Active Learners</span></article>
+                    <article class="stat-card"><i data-lucide="medal" aria-hidden="true"></i><span class="stat-number" data-counter="9870">0</span><span>Highest Score</span></article>
+                </div>
+            </section>
+
+            <section id="navigation-cards" class="landing-section practice-section">
+                <div class="section-shell feature-section-shell">
+                    <div class="section-heading"><p>Practice</p><h2>Build speed. Build confidence.</h2><span>Short, focused challenges that make the next question feel easier.</span></div>
+                    <a href="quiz.html" class="card-item card-featured" id="card-start">
+                        <div class="card-content"><span class="card-text">Practice Mathematics</span><i class="fa-solid fa-play card-icon"></i></div>
+                        <span class="ripple-container"></span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="landing-section category-section">
+                <div class="section-shell feature-section-shell">
+                    <div class="section-heading"><p>Categories</p><h2>Choose your next challenge.</h2><span>Explore formula-first learning paths across the mathematics curriculum.</span></div>
+                    <a href="#" class="card-item" id="card-categories">
+                        <div class="card-content"><span class="card-text">Browse Categories</span><i class="fa-solid fa-th-large card-icon"></i></div>
+                        <span class="ripple-container"></span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="landing-section leaderboard-section">
+                <div class="section-shell feature-section-shell split-feature-shell">
+                    <div class="section-heading"><p>Leaderboard</p><h2>See how your practice stacks up.</h2><span>Your latest topic scores remain available in the existing leaderboard.</span></div>
+                    <a href="#" class="card-item" id="card-leaderboard">
+                        <div class="card-content"><span class="card-text">Open Leaderboard</span><i class="fa-solid fa-trophy card-icon"></i></div>
+                        <span class="ripple-container"></span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="landing-section utility-section">
+                <div class="section-shell utility-grid">
+                    <a href="#" class="card-item" id="card-settings">
+                        <div class="card-content"><span class="card-text">Settings</span><i class="fa-solid fa-gear card-icon"></i></div>
+                        <span class="ripple-container"></span>
+                    </a>
+                    <a href="#" class="card-item" id="card-about">
+                        <div class="card-content"><span class="card-text">About NumericallyInclined</span><i class="fa-solid fa-circle-info card-icon"></i></div>
+                        <span class="ripple-container"></span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="landing-section journey-section" aria-labelledby="journey-title">
+                <div class="section-shell journey-shell">
+                    <div class="section-heading"><p>Practice Journey</p><h2 id="journey-title">Keep the momentum visible.</h2><span>Every completed quiz adds to your learning history.</span></div>
+                    <div class="journey-dashboard">
+                        <div id="practice-heatmap" class="practice-heatmap" aria-label="Practice contribution heatmap"></div>
+                        <div class="journey-legend"><span>Less</span><i></i><i></i><i></i><i></i><i></i><span>More</span></div>
+                        <div class="journey-metrics">
+                            <article><span id="journey-current-streak">0</span><small>Current Streak</small></article>
+                            <article><span id="journey-longest-streak">0</span><small>Longest Streak</small></article>
+                            <article><span id="journey-practice-days">0</span><small>Practice Days</small></article>
+                            <article><span id="journey-questions-solved">0</span><small>Questions Solved</small></article>
+                            <article><span id="journey-average-accuracy">0%</span><small>Average Accuracy</small></article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="site-footer">
+                <div><strong>NumericallyInclined</strong><span>Built for the Joy of Mathematics.</span></div>
+                <nav aria-label="Footer navigation"><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Contact</a><a href="#">GitHub</a></nav>
+            </footer>
+
+    </main>
+    </div>
+
+    <div id="categories-view" class="categories-view" aria-hidden="true">
+        <section class="categories-subpage" aria-labelledby="categories-title">
+            <div class="categories-subpage-inner">
+                <button id="categories-back-btn" class="formulas-back-button" type="button"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to Home</button>
+                <p class="knowledge-hub-eyebrow">Categories</p>
+                <h2 id="categories-title">Mathematics Categories</h2>
+                <p>Explore focused mathematics resources and start learning from the essentials.</p>
+                <button id="important-formulas-btn" class="important-formulas-button" type="button">
+                    <i data-lucide="book-open" aria-hidden="true"></i>
+                    <span>Important Formulas</span>
+                    <i data-lucide="arrow-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <div id="formulas-view" class="formulas-view" aria-hidden="true">
+        <section id="knowledge-hub" class="knowledge-hub" aria-labelledby="knowledge-hub-title">
+            <div class="knowledge-hub-inner">
+                <div class="knowledge-hub-heading">
+                    <button id="formulas-back-btn" class="formulas-back-button" type="button"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to Categories</button>
+                    <p class="knowledge-hub-eyebrow">Mathematics Library</p>
+                    <h2 id="knowledge-hub-title">Mathematics Knowledge Hub</h2>
+                    <p>Master every important formula, concept, shortcut, and trick in one place.</p>
+                </div>
+
+                <label class="formula-search" for="formula-search">
+                    <i data-lucide="search" aria-hidden="true"></i>
+                    <input id="formula-search" type="search" placeholder="Search formulas..." autocomplete="off">
+                </label>
+
+                <div id="topic-grid" class="topic-grid" aria-live="polite"></div>
+                <p id="topic-empty-state" class="topic-empty-state" hidden>No matching topics found.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Quiz View (Initially Hidden) -->
+    <div id="quiz-view" class="view-section">
+        <!-- Background & Overlay -->
+        <div class="quiz-bg-blur"></div>
+        <div class="quiz-bg"></div>
+        <div class="quiz-overlay"></div>
+        
+        <div class="quiz-container">
+            <!-- Main Quiz Screen -->
+            <div id="quiz-screen" class="glass-card">
+                
+                <div class="quiz-header">
+                    <span class="question-number">Question 1/10</span>
+                    <div class="score-display">
+                        Score: <span id="current-score">0</span> | Streak: <span id="current-streak">0</span>
+                    </div>
+                    <div id="quiz-countdown" class="quiz-countdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span id="countdown-text">10s</span>
+                    </div>
+                </div>
+                
+                <div class="timer-container">
+                    <div class="timer-bar" id="timer-bar"></div>
+                </div>
+                
+                <div class="question-display">
+                    <div id="math-question">728 + 496 = ?</div>
+                </div>
+                
+                <div class="answer-section">
+                    <input type="number" id="answer-input" placeholder="?" autocomplete="off">
+                    <button id="submit-btn">Submit</button>
+                </div>
+                
+                <div class="feedback-msg" id="feedback-msg"></div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                
+            </div>
+
+            <!-- Results Screen -->
+            <div id="results-screen" class="glass-card hidden">
+                <i class="fa-solid fa-trophy results-icon"></i>
+                <h2>Quiz Complete!</h2>
+                
+                <div class="results-stats">
+                    <p>Final Score: <strong id="final-score">0</strong></p>
+                    <p>Accuracy: <strong id="final-accuracy">0%</strong></p>
+                    <p>Highest Streak: <strong id="highest-streak">0</strong></p>
+                </div>
+                
+                <div class="leaderboard">
+                    <h3><i class="fa-solid fa-medal"></i> Leaderboard</h3>
+                    <ul id="leaderboard-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="play-again-btn"><i class="fa-solid fa-rotate-right"></i> Play Again</button>
+                    <button class="home-btn" id="home-btn"><i class="fa-solid fa-house"></i> Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>
