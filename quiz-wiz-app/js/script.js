@@ -1,8 +1,72 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
+    // QUIZ MODE SETTINGS
+    // =========================================================
+    const settingsModal = document.getElementById('settings-modal');
+    const btnOpenSettings = document.getElementById('card-settings');
+    const btnCloseSettings = document.getElementById('close-settings-btn');
+    const btnSaveSettings = document.getElementById('save-settings-btn');
+    const radioModes = document.querySelectorAll('input[name="quizMode"]');
+
+    window.appQuizMode = localStorage.getItem('quizMode') || 'adaptive';
+    if(radioModes.length > 0) {
+        radioModes.forEach(r => {
+            if (r.value === window.appQuizMode) r.checked = true;
+        });
+    }
+
+    if (btnOpenSettings) {
+        btnOpenSettings.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(settingsModal) settingsModal.setAttribute('aria-hidden', 'false');
+        });
+    }
+    if (btnCloseSettings) {
+        btnCloseSettings.addEventListener('click', () => {
+            if(settingsModal) settingsModal.setAttribute('aria-hidden', 'true');
+        });
+    }
+    if (btnSaveSettings) {
+        btnSaveSettings.addEventListener('click', () => {
+            const selected = document.querySelector('input[name="quizMode"]:checked');
+            if(selected) {
+                window.appQuizMode = selected.value;
+                localStorage.setItem('quizMode', selected.value);
+            }
+            if(settingsModal) settingsModal.setAttribute('aria-hidden', 'true');
+            showToast("Settings saved successfully!");
+        });
+    }
+
+    // =========================================================
     // HOME VIEW LOGIC (Navigation & Ripples)
     // =========================================================
     const cardItems = document.querySelectorAll('.card-item');
+    
+    function selectNumberTile(tile) {
+        const grid = tile.closest('.table-selector-grid');
+        if (!grid) return;
+
+        grid.querySelectorAll('.number-tile').forEach(item => {
+            const isSelected = item === tile;
+            item.classList.toggle('is-selected', isSelected);
+            item.setAttribute('aria-pressed', String(isSelected));
+        });
+    }
+
+    function createNumberTile(number, onSelect) {
+        const tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'number-tile';
+        tile.dataset.number = String(number);
+        tile.textContent = number;
+        tile.setAttribute('aria-pressed', 'false');
+        tile.addEventListener('click', () => {
+            selectNumberTile(tile);
+            onSelect(number);
+        });
+        return tile;
+    }
 
     function setActiveNavItem(activeLink) {
         document.querySelectorAll('.premium-nav-link').forEach(link => {
@@ -252,6 +316,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formulasBackBtn) {
         formulasBackBtn.addEventListener('click', () => {
             closeFormulasView();
+            document.getElementById('categories-view')?.classList.add('active');
+            document.getElementById('categories-view')?.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    // =========================================================
+    // TABLES VIEW LOGIC (Navigation)
+    // =========================================================
+    
+    function openTablesView() {
+        const tablesView = document.getElementById('tables-view');
+        const categoriesView = document.getElementById('categories-view');
+        if (!tablesView || !categoriesView) return;
+
+        tablesView.classList.add('active');
+        tablesView.setAttribute('aria-hidden', 'false');
+        categoriesView.classList.remove('active');
+        categoriesView.setAttribute('aria-hidden', 'true');
+        tablesView.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeTablesView() {
+        const tablesView = document.getElementById('tables-view');
+        if (!tablesView) return;
+
+        tablesView.classList.remove('active');
+        tablesView.setAttribute('aria-hidden', 'true');
+    }
+
+    const multiplicationTablesBtn = document.getElementById('multiplication-tables-btn');
+    if (multiplicationTablesBtn) {
+        multiplicationTablesBtn.addEventListener('click', openTablesView);
+    }
+
+    const tablesBackBtn = document.getElementById('tables-back-btn');
+    if (tablesBackBtn) {
+        tablesBackBtn.addEventListener('click', () => {
+            closeTablesView();
             document.getElementById('categories-view')?.classList.add('active');
             document.getElementById('categories-view')?.setAttribute('aria-hidden', 'false');
         });
@@ -509,72 +611,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let streak = 0;
     let highestStreak = 0;
     let correctAnswers = 0;
+    let totalQuestionsAttempted = 0;
     let quizTimer;
+    let nextQuestionTimeout;
     let timeLeft = TIME_LIMIT;
     let currentAnswer = 0;
     let isProcessing = false;
-
-const allQuestions = [
-    // Algebra
-    { category: "Algebra", question: "If 3x + 7 = 22, what is x?", answer: 5 },
-    { category: "Algebra", question: "Solve for y: 2y - 4 = 10", answer: 7 },
-    { category: "Algebra", question: "If 5a = 35, what is a?", answer: 7 },
-    // Number System
-    { category: "Number System", question: "What is the smallest prime number?", answer: 2 },
-    { category: "Number System", question: "What is 15% of 200? (Wait, that's percentage, just simple arithmetic)", answer: 30 },
-    // Percentage
-    { category: "Percentage", question: "What is 20% of 50?", answer: 10 },
-    { category: "Percentage", question: "If 25% of x is 10, what is x?", answer: 40 },
-    // Profit & Loss
-    { category: "Profit & Loss", question: "Buy at 100, sell at 120. Profit percentage?", answer: 20 },
-    { category: "Profit & Loss", question: "Cost 50, profit 10. Selling price?", answer: 60 },
-    // Simple Interest
-    { category: "Simple Interest", question: "Principal 1000, Rate 5%, Time 2 years. Interest?", answer: 100 },
-    // Compound Interest
-    { category: "Compound Interest", question: "Principal 100, Rate 10%, 2 years compound. Amount?", answer: 121 },
-    // Mensuration
-    { category: "Mensuration", question: "Perimeter of square with side 6?", answer: 24 },
-    { category: "Mensuration", question: "Area of a rectangle with width 4 and height 5?", answer: 20 },
-    // Geometry
-    { category: "Geometry", question: "Sum of angles in a triangle?", answer: 180 },
-    { category: "Geometry", question: "Number of sides in a hexagon?", answer: 6 },
-    // Trigonometry
-    { category: "Trigonometry", question: "If sin(x) = 0, what is the smallest positive x in degrees?", answer: 180 },
-    { category: "Trigonometry", question: "Value of tan(45 degrees)?", answer: 1 },
-    // Calculus
-    { category: "Calculus", question: "Derivative of 3x with respect to x?", answer: 3 },
-    { category: "Calculus", question: "Integral of 2 with respect to x from 0 to 3?", answer: 6 },
-    // Probability
-    { category: "Probability", question: "A bag has 3 red and 2 blue balls. Probability of red (%)?", answer: 60 },
-    { category: "Probability", question: "Probability of rolling a 4 on a standard die (in percentage, approx)?", answer: 16 }, // wait input is integer
-    // Statistics
-    { category: "Statistics", question: "Median of 1, 3, 3, 6, 7, 8, 9?", answer: 6 },
-    { category: "Statistics", question: "Mean of 10, 20, 30?", answer: 20 },
-    // Permutation & Combination
-    { category: "Permutation & Combination", question: "Value of 4! (4 factorial)?", answer: 24 },
-    // Coordinate Geometry
-    { category: "Coordinate Geometry", question: "Distance between (0,0) and (3,4)?", answer: 5 },
-    // Ratio & Proportion
-    { category: "Ratio & Proportion", question: "If A:B is 2:3 and A is 10, what is B?", answer: 15 },
-    // Time & Work
-    { category: "Time & Work", question: "A does a job in 10 days, B in 10 days. Together (days)?", answer: 5 },
-    // Average
-    { category: "Average", question: "Average of 4, 8, 12?", answer: 8 },
-    // Mixture & Alligation
-    { category: "Mixture & Alligation", question: "For 10 and 20 with mean 14, first ratio term?", answer: 6 },
-    // Linear Equations
-    { category: "Linear Equations", question: "Solve 2x + 6 = 10", answer: 2 },
-    // Quadratic Equations
-    { category: "Quadratic Equations", question: "Positive root of x^2 - 16 = 0", answer: 4 },
-    // Limits
-    { category: "Limits", question: "Limit of 2x as x approaches 3", answer: 6 },
-    // Integration
-    { category: "Integration", question: "Integral of 2x from 0 to 2", answer: 4 },
-    // Differentiation
-    { category: "Differentiation", question: "Derivative of x^2 at x = 3", answer: 6 }
-];
-
-let activeQuestions = [];
+    const formulaEngine = new FormulaGeneratorEngine();
+    let currentGeneratedQuestion = null;
 
     let quizInProgress = false;
     let selectedTopic = 'Math';
@@ -617,6 +661,7 @@ let activeQuestions = [];
 
     function returnToHome() {
         clearInterval(quizTimer);
+        clearTimeout(nextQuestionTimeout);
 
         if (quizInProgress && (currentQuestion > 1 || isProcessing || score > 0)) {
             const completedQuestions = Math.min(currentQuestion, TOTAL_QUESTIONS);
@@ -625,6 +670,11 @@ let activeQuestions = [];
             displayLeaderboard();
         }
         quizInProgress = false;
+        window.isTablePracticeMode = false;
+        window.isSquaresPracticeMode = false;
+        window.isCubesPracticeMode = false;
+        window.isSquareRootsPracticeMode = false;
+        window.isCubeRootsPracticeMode = false;
 
         const quizView = document.getElementById('quiz-view');
         quizView.classList.remove('active');
@@ -696,65 +746,154 @@ let activeQuestions = [];
 
     function generateQuestion() {
         isProcessing = false;
-        
-        // Topic Quiz Logic
-        if (selectedTopic !== 'Math') { 
-            if (activeQuestions.length === 0) {
-                mathQuestionEl.textContent = "No questions available for this topic yet.";
-                answerInput.value = '';
-                answerInput.disabled = true;
-                submitBtn.disabled = true;
-                feedbackMsg.textContent = '';
-                if(document.getElementById('countdown-text')) {
-                    document.getElementById('countdown-text').textContent = '-';
+
+        if (window.isTablePracticeMode) {
+            let tableNum = window.activeTableNumber;
+            let multiplier;
+            const diff = formulaEngine.getDifficulty();
+            
+            if (window.activeTableNumber === null) {
+                // Hard / Mixed
+                tableNum = Math.floor(Math.random() * 30) + 1;
+                multiplier = Math.floor(Math.random() * 20) + 1;
+            } else {
+                if (diff === 'Easy') {
+                    multiplier = Math.floor(Math.random() * 10) + 1;
+                } else if (diff === 'Medium') {
+                    multiplier = Math.floor(Math.random() * 20) + 1;
+                } else {
+                    multiplier = Math.floor(Math.random() * 90) + 11; // 11 to 100
                 }
-                if (typeof quizTimer !== 'undefined') clearInterval(quizTimer); // stop timer
-                return;
             }
             
-            // Get the current question from the shuffled activeQuestions
-            const qIndex = (currentQuestion - 1) % activeQuestions.length;
-            const q = activeQuestions[qIndex];
+            let attempts = 0;
+            let questionText = `${tableNum} × ${multiplier} = ?`;
             
-            currentAnswer = q.answer;
-            mathQuestionEl.textContent = q.question;
+            while (formulaEngine.history.has(questionText) && attempts < 50) {
+                if (window.activeTableNumber === null) tableNum = Math.floor(Math.random() * 30) + 1;
+                multiplier = diff === 'Easy' ? Math.floor(Math.random() * 10) + 1 :
+                             diff === 'Medium' ? Math.floor(Math.random() * 20) + 1 :
+                             Math.floor(Math.random() * 90) + 11;
+                questionText = `${tableNum} × ${multiplier} = ?`;
+                attempts++;
+            }
+            formulaEngine.history.add(questionText);
+            
+            currentGeneratedQuestion = {
+                question: questionText,
+                answer: tableNum * multiplier
+            };
+        } else if (window.isSquaresPracticeMode) {
+            currentGeneratedQuestion = window.generateSquareQuestion();
+        } else if (window.isCubesPracticeMode) {
+            currentGeneratedQuestion = window.generateCubeQuestion();
+        } else if (window.isSquareRootsPracticeMode) {
+            currentGeneratedQuestion = window.generateSquareRootQuestion();
+        } else if (window.isCubeRootsPracticeMode) {
+            currentGeneratedQuestion = window.generateCubeRootQuestion();
+        } else {
+            currentGeneratedQuestion = formulaEngine.nextQuestion(selectedTopic);
+        }
+        
+        // --- QUIZ MODE ENGINE ---
+        let useMCQ = false;
+        let mode = window.appQuizMode || 'adaptive';
+        
+        if (mode === 'mcq') {
+            useMCQ = true;
+        } else if (mode === 'typing') {
+            useMCQ = false;
+        } else if (mode === 'adaptive') {
+            let diff = formulaEngine.getDifficulty();
+            let baseMCQProb = 0.5;
+            if (diff === 'Easy') baseMCQProb = 1.0;
+            else if (diff === 'Hard') baseMCQProb = 0.0;
+            
+            let totalQs = totalQuestionsAttempted || 0;
+            let recentAcc = totalQs > 0 ? (correctAnswers / totalQs) : 1; 
+            
+            if (recentAcc > 0.9 && totalQs >= 3) {
+                baseMCQProb -= 0.5; 
+            } else if (recentAcc < 0.5 && totalQs >= 3) {
+                baseMCQProb += 0.5; 
+            }
+            baseMCQProb = Math.max(0, Math.min(1, baseMCQProb));
+            useMCQ = Math.random() < baseMCQProb;
+            
+            let styleString = useMCQ ? 'mcq' : 'typing';
+            if (window.lastAdaptiveStyle !== styleString) {
+                if (styleString === 'typing' && totalQs > 0) {
+                    showToast("🧠 Great progress! Switching to Type Answer.");
+                } else if (styleString === 'mcq' && totalQs > 0) {
+                    showToast("💡 Let's build confidence. Switching to MCQs.");
+                }
+                window.lastAdaptiveStyle = styleString;
+            }
+        }
+        
+        currentGeneratedQuestion.isMCQ = useMCQ;
+        
+        if (useMCQ && (!currentGeneratedQuestion.options || currentGeneratedQuestion.options.length < 4)) {
+            let ans = currentGeneratedQuestion.answer;
+            let opts = new Set([ans]);
+            let isFloat = !Number.isInteger(ans);
+            let attempts = 0;
+            while(opts.size < 4 && attempts < 50) {
+                let offset = isFloat ? (Math.random() * 2).toFixed(2) : Math.floor(Math.random() * 5) + 1;
+                let val1 = isFloat ? parseFloat((ans + Number(offset)).toFixed(2)) : ans + offset;
+                let val2 = isFloat ? parseFloat((ans - Number(offset)).toFixed(2)) : ans - offset;
+                if (Math.random() > 0.5) opts.add(val1);
+                else opts.add(val2);
+                attempts++;
+            }
+            while(opts.size < 4) opts.add(isFloat ? ans + Math.random() : ans + Math.floor(Math.random()*100)+1);
+            currentGeneratedQuestion.options = Array.from(opts).sort(() => Math.random() - 0.5);
+        }
+        // ------------------------
+
+        currentAnswer = currentGeneratedQuestion.answer;
+        mathQuestionEl.textContent = currentGeneratedQuestion.question;
+        
+        const mcqChoices = document.getElementById('mcq-choices');
+        
+        if (currentGeneratedQuestion.isMCQ) {
+            answerInput.style.display = 'none';
+            submitBtn.style.display = 'none';
+            mcqChoices.classList.remove('hidden');
+            
+            mcqChoices.innerHTML = '';
+            currentGeneratedQuestion.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (isProcessing) return;
+                    if (opt === currentAnswer) {
+                        btn.classList.add('correct');
+                    } else {
+                        btn.classList.add('wrong');
+                        // Highlight correct
+                        Array.from(mcqChoices.children).forEach(c => {
+                            if (Number(c.textContent) === currentAnswer) c.classList.add('correct');
+                        });
+                    }
+                    checkAnswer(opt);
+                };
+                mcqChoices.appendChild(btn);
+            });
+        } else {
+            answerInput.style.display = '';
+            submitBtn.style.display = '';
+            if (mcqChoices) mcqChoices.classList.add('hidden');
             
             answerInput.value = '';
             answerInput.disabled = false;
             submitBtn.disabled = false;
-            feedbackMsg.className = 'feedback-msg';
-            feedbackMsg.textContent = '';
             setTimeout(() => answerInput.focus(), 100);
-            return;
         }
-
-        // Randomly choose addition or subtraction
-        const isAddition = Math.random() > 0.5;
-        // Generate random 2 to 3 digit numbers
-        const num1 = Math.floor(Math.random() * 900) + 10;
-        const num2 = Math.floor(Math.random() * 900) + 10;
-        
-        if (isAddition) {
-            currentAnswer = num1 + num2;
-            mathQuestionEl.textContent = `${num1} + ${num2} = ?`;
-        } else {
-            // Ensure positive results for simplicity by keeping larger number first
-            const a = Math.max(num1, num2);
-            const b = Math.min(num1, num2);
-            currentAnswer = a - b;
-            mathQuestionEl.textContent = `${a} - ${b} = ?`;
-        }
-        
-        answerInput.value = '';
-        answerInput.disabled = false;
-        submitBtn.disabled = false;
         
         // Reset feedback
         feedbackMsg.className = 'feedback-msg';
         feedbackMsg.textContent = '';
-        
-        // Ensure input is focused for desktop users
-        setTimeout(() => answerInput.focus(), 100);
     }
 
     function formatTime(seconds) {
@@ -808,17 +947,22 @@ let activeQuestions = [];
         }, 100);
     }
 
-    function checkAnswer() {
-        if (isProcessing || answerInput.value.trim() === '') return;
+    function checkAnswer(overrideAnswer = null) {
+        if (overrideAnswer === null && (isProcessing || answerInput.value.trim() === '')) return;
+        if (overrideAnswer !== null && isProcessing) return;
         isProcessing = true;
         clearInterval(quizTimer);
         
-        const userAnswer = Number(answerInput.value);
+        const userAnswer = overrideAnswer !== null ? overrideAnswer : Number(answerInput.value);
         
         answerInput.disabled = true;
         submitBtn.disabled = true;
 
-        if (userAnswer === currentAnswer) {
+        const isCorrect = Math.abs(userAnswer - currentAnswer) < 0.000001;
+        totalQuestionsAttempted++;
+        formulaEngine.recordAnswer(isCorrect);
+
+        if (isCorrect) {
             // Correct Answer
             const timeBonus = Math.floor(timeLeft) * 10;
             score += 100 + timeBonus; 
@@ -835,21 +979,35 @@ let activeQuestions = [];
             feedbackMsg.className = 'feedback-msg wrong show';
         }
         
+        if (window.checkAchievements) window.checkAchievements(streak, score, correctAnswers);
+        
         updateStats();
-        setTimeout(nextQuestion, 1500); // Auto-next after 1.5 seconds delay
+        scheduleNextQuestion(1500); // Auto-next after 1.5 seconds delay
     }
 
     function handleTimeout() {
         isProcessing = true;
+        totalQuestionsAttempted++;
+        formulaEngine.recordAnswer(false);
         answerInput.disabled = true;
         submitBtn.disabled = true;
         streak = 0;
+        
+        if (window.checkAchievements) window.checkAchievements(streak, score, correctAnswers);
         
         updateStats();
         feedbackMsg.innerHTML = `<i class="fa-solid fa-clock"></i> Time's Up! Answer was ${currentAnswer}`;
         feedbackMsg.className = 'feedback-msg wrong show';
         
-        setTimeout(nextQuestion, 1000);
+        scheduleNextQuestion(1000);
+    }
+
+    function scheduleNextQuestion(delay) {
+        clearTimeout(nextQuestionTimeout);
+        nextQuestionTimeout = setTimeout(() => {
+            nextQuestionTimeout = undefined;
+            nextQuestion();
+        }, delay);
     }
 
     function nextQuestion() {
@@ -880,6 +1038,7 @@ let activeQuestions = [];
     function endQuiz() {
         quizInProgress = false;
         clearInterval(quizTimer); // Stop the global timer completely
+        clearTimeout(nextQuestionTimeout);
         // Fill the progress bar completely
         if(progressBar) progressBar.style.width = '100%';
         
@@ -998,20 +1157,17 @@ let activeQuestions = [];
     }
 
     function resetQuiz() {
+        clearInterval(quizTimer);
+        clearTimeout(nextQuestionTimeout);
         currentQuestion = 1;
         score = 0;
         streak = 0;
         highestStreak = 0;
         correctAnswers = 0;
+        totalQuestionsAttempted = 0;
         quizInProgress = true;
         
-        if (selectedTopic !== 'Math') {
-            activeQuestions = allQuestions.filter(q => q.category === selectedTopic);
-            // Shuffle activeQuestions
-            activeQuestions = activeQuestions.sort(() => Math.random() - 0.5);
-        } else {
-            activeQuestions = [];
-        }
+        formulaEngine.startSession(selectedTopic);
         
         if(questionNumberEl) questionNumberEl.textContent = `Question ${currentQuestion}/${TOTAL_QUESTIONS}`;
         updateStats();
@@ -1110,4 +1266,981 @@ let activeQuestions = [];
             openCategoriesView();
         });
     }
+
+    // =========================================================
+    // MULTIPLICATION TABLES MODULE LOGIC
+    // =========================================================
+    
+    window.isTablePracticeMode = false;
+    window.activeTableNumber = null;
+
+    const tableSelectorGrid = document.getElementById('table-selector-grid');
+    const singleTableView = document.getElementById('single-table-view');
+    const tableSelector = document.getElementById('table-selector');
+    const singleTableContent = document.getElementById('single-table-content');
+    const singleTableTitle = document.getElementById('single-table-title');
+
+    if (tableSelectorGrid) {
+        for (let i = 1; i <= 30; i++) {
+            tableSelectorGrid.appendChild(createNumberTile(i, showTable));
+        }
+    }
+
+    function showTable(number) {
+        window.activeTableNumber = number;
+        if (tableSelector) tableSelector.classList.add('hidden');
+        if (singleTableView) {
+            singleTableView.classList.remove('hidden');
+            singleTableView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (singleTableTitle) singleTableTitle.textContent = `Table of ${number}`;
+        
+        let html = '';
+        for (let i = 1; i <= 20; i++) {
+            html += `<div class="table-row">
+                        <span>${number} × ${i}</span>
+                        <span class="table-row-ans">= ${number * i}</span>
+                     </div>`;
+        }
+        if (singleTableContent) singleTableContent.innerHTML = html;
+    }
+
+    const singleTableBackBtn = document.getElementById('single-table-back-btn');
+    if (singleTableBackBtn) {
+        singleTableBackBtn.addEventListener('click', () => {
+            if (singleTableView) singleTableView.classList.add('hidden');
+            if (tableSelector) tableSelector.classList.remove('hidden');
+            window.activeTableNumber = null;
+        });
+    }
+
+    const tablesViewBtn = document.getElementById('tables-view-btn');
+    if (tablesViewBtn) {
+        tablesViewBtn.addEventListener('click', () => {
+            if (singleTableView) singleTableView.classList.add('hidden');
+            if (tableSelector) {
+                tableSelector.classList.remove('hidden');
+                tableSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    function startTablePractice(specificTable = null) {
+        window.isTablePracticeMode = true;
+        window.activeTableNumber = specificTable; 
+        selectedTopic = specificTable ? `Tables - Table ${specificTable}` : `Tables - Mixed`;
+        
+        const homeView = document.getElementById('home-view');
+        if(homeView) homeView.classList.add('hidden-view');
+        const categoriesView = document.getElementById('categories-view');
+        if(categoriesView) {
+            categoriesView.classList.remove('active');
+            categoriesView.setAttribute('aria-hidden', 'true');
+        }
+        const tablesView = document.getElementById('tables-view');
+        if (tablesView) {
+            tablesView.classList.remove('active');
+            tablesView.setAttribute('aria-hidden', 'true');
+        }
+
+        const quizView = document.getElementById('quiz-view');
+        if(quizView) {
+            quizView.classList.add('active');
+            quizView.classList.add('slide-in-up');
+        }
+        document.body.classList.add('quiz-active');
+        
+        resetQuiz();
+    }
+
+    const tablesPracticeBtn = document.getElementById('tables-practice-btn');
+    if (tablesPracticeBtn) {
+        tablesPracticeBtn.addEventListener('click', () => startTablePractice(null));
+    }
+
+    const startTablePracticeBtn = document.getElementById('start-table-practice-btn');
+    if (startTablePracticeBtn) {
+        startTablePracticeBtn.addEventListener('click', () => {
+            if (window.activeTableNumber) {
+                startTablePractice(window.activeTableNumber);
+            }
+        });
+    }
+
+    // =========================================================
+    // SQUARES MODULE LOGIC
+    // =========================================================
+    
+    window.isSquaresPracticeMode = false;
+
+    const squaresView = document.getElementById('squares-view');
+    const squaresBtn = document.getElementById('squares-btn');
+    const squaresBackBtn = document.getElementById('squares-back-btn');
+    const squaresSelector = document.getElementById('squares-selector');
+    const squaresSelectorGrid = document.getElementById('squares-selector-grid');
+    const singleSquareView = document.getElementById('single-square-view');
+    const singleSquareTitle = document.getElementById('single-square-title');
+    const singleSquareEquation = document.getElementById('single-square-equation');
+    const singleSquareTrick = document.getElementById('single-square-trick');
+    
+    let currentViewSquare = null;
+
+    if (squaresBtn) {
+        squaresBtn.addEventListener('click', () => {
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.remove('active');
+                categoriesView.setAttribute('aria-hidden', 'true');
+            }
+            if(squaresView) {
+                squaresView.classList.add('active');
+                squaresView.setAttribute('aria-hidden', 'false');
+                squaresView.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (squaresBackBtn) {
+        squaresBackBtn.addEventListener('click', () => {
+            if(squaresView) {
+                squaresView.classList.remove('active');
+                squaresView.setAttribute('aria-hidden', 'true');
+            }
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.add('active');
+                categoriesView.setAttribute('aria-hidden', 'false');
+            }
+        });
+    }
+
+    if (squaresSelectorGrid) {
+        for (let i = 1; i <= 100; i++) {
+            squaresSelectorGrid.appendChild(createNumberTile(i, showSquare));
+        }
+    }
+
+    function showSquare(number) {
+        if (number < 1 || number > 100) return;
+        currentViewSquare = number;
+        
+        if(squaresSelector) squaresSelector.classList.add('hidden');
+        if(singleSquareView) {
+            singleSquareView.classList.remove('hidden');
+            singleSquareView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        if (singleSquareTitle) singleSquareTitle.textContent = `Square of ${number}`;
+        if (singleSquareEquation) singleSquareEquation.textContent = `${number}² = ${number * number}`;
+        
+        if (singleSquareTrick) {
+            let trick = '';
+            if (number % 10 === 5) {
+                let n = Math.floor(number / 10);
+                trick = `Memory Trick: Ends in 5. Multiply ${n} × ${n+1} = ${n*(n+1)}, and append 25. Result: ${n*(n+1)}25.`;
+            } else if (number === 10 || number === 100) {
+                trick = `Memory Trick: Just double the zeros!`;
+            }
+            if (trick) {
+                singleSquareTrick.textContent = trick;
+                singleSquareTrick.classList.remove('hidden');
+            } else {
+                singleSquareTrick.classList.add('hidden');
+            }
+        }
+    }
+
+    const singleSquareBackBtn = document.getElementById('single-square-back-btn');
+    if (singleSquareBackBtn) {
+        singleSquareBackBtn.addEventListener('click', () => {
+            if(singleSquareView) singleSquareView.classList.add('hidden');
+            if(squaresSelector) squaresSelector.classList.remove('hidden');
+        });
+    }
+    
+    document.getElementById('squares-view-btn')?.addEventListener('click', () => {
+        if(singleSquareView) singleSquareView.classList.add('hidden');
+        if(squaresSelector) {
+            squaresSelector.classList.remove('hidden');
+            squaresSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('square-prev-btn')?.addEventListener('click', () => {
+        if (currentViewSquare > 1) showSquare(currentViewSquare - 1);
+    });
+    
+    document.getElementById('square-next-btn')?.addEventListener('click', () => {
+        if (currentViewSquare < 100) showSquare(currentViewSquare + 1);
+    });
+    
+    document.getElementById('square-copy-btn')?.addEventListener('click', () => {
+        if (currentViewSquare) {
+            navigator.clipboard.writeText(`${currentViewSquare}² = ${currentViewSquare * currentViewSquare}`);
+            showToast("Copied to clipboard!");
+        }
+    });
+
+    const squareSearch = document.getElementById('squares-search');
+    if (squareSearch) {
+        squareSearch.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 1 && val <= 100) {
+                showSquare(val);
+                e.target.value = ''; 
+            }
+        });
+    }
+
+    // Achievements System
+    window.unlockedBadges = JSON.parse(localStorage.getItem('mathBadges')) || [];
+    function showToast(message) {
+        const container = document.getElementById('toast-container');
+        if(!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i data-lucide="star" aria-hidden="true"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    function unlockBadge(badgeId, badgeName) {
+        if (!window.unlockedBadges.includes(badgeId)) {
+            window.unlockedBadges.push(badgeId);
+            localStorage.setItem('mathBadges', JSON.stringify(window.unlockedBadges));
+            showToast(`Unlocked: ${badgeName}!`);
+        }
+    }
+    
+    window.checkAchievements = function(streak, score, correctAnswers) {
+        if (streak === 10) unlockBadge('streak_10', '🔥 10 Correct in a Row');
+        if (score > 1000) unlockBadge('score_1000', '⚡ Perfect Score'); 
+        // More specific achievements logic can be added here
+        
+        if (window.isSquaresPracticeMode) {
+            const diff = formulaEngine.getDifficulty();
+            if (correctAnswers >= 5) {
+                if (diff === 'Easy') unlockBadge('squares_20', '⭐ Learned Squares 1–20');
+                if (diff === 'Medium') unlockBadge('squares_50', '⭐⭐ Learned Squares 1–50');
+                if (diff === 'Hard') unlockBadge('squares_100', '⭐⭐⭐ Learned Squares 1–100');
+            }
+        }
+        
+        if (window.isCubesPracticeMode) {
+            const diff = formulaEngine.getDifficulty();
+            if (correctAnswers >= 5) {
+                if (diff === 'Easy') unlockBadge('cubes_20', '⭐ Learned Cubes 1–20');
+                if (diff === 'Medium') unlockBadge('cubes_50', '⭐⭐ Learned Cubes 1–50');
+                if (diff === 'Hard') unlockBadge('cubes_100', '⭐⭐⭐ Learned Cubes 1–100');
+            }
+        }
+        
+        if (window.isSquareRootsPracticeMode) {
+            const diff = formulaEngine.getDifficulty();
+            if (correctAnswers >= 5) {
+                if (diff === 'Easy') unlockBadge('squareroots_20', '⭐ Learned Square Roots 1–20');
+                if (diff === 'Medium') unlockBadge('squareroots_50', '⭐⭐ Learned Square Roots 1–50');
+                if (diff === 'Hard') unlockBadge('squareroots_100', '⭐⭐⭐ Learned Square Roots 1–100');
+            }
+        }
+        
+        if (window.isCubeRootsPracticeMode) {
+            const diff = formulaEngine.getDifficulty();
+            if (correctAnswers >= 5) {
+                if (diff === 'Easy') unlockBadge('cuberoots_20', '⭐ Learned Cube Roots 1–20');
+                if (diff === 'Medium') unlockBadge('cuberoots_50', '⭐⭐ Learned Cube Roots 1–50');
+                if (diff === 'Hard') unlockBadge('cuberoots_100', '⭐⭐⭐ Learned Cube Roots 1–100');
+            }
+        }
+    };
+
+    function startSquarePractice() {
+        window.isSquaresPracticeMode = true;
+        selectedTopic = 'Squares';
+        
+        const viewsToHide = ['home-view', 'categories-view', 'squares-view'];
+        viewsToHide.forEach(id => {
+            const v = document.getElementById(id);
+            if(v) {
+                v.classList.remove('active');
+                if(id==='home-view') v.classList.add('hidden-view');
+                else v.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        const quizView = document.getElementById('quiz-view');
+        if(quizView) {
+            quizView.classList.add('active');
+            quizView.classList.add('slide-in-up');
+        }
+        document.body.classList.add('quiz-active');
+        
+        resetQuiz();
+    }
+
+    document.getElementById('squares-practice-btn')?.addEventListener('click', startSquarePractice);
+    document.getElementById('start-square-practice-btn')?.addEventListener('click', startSquarePractice);
+
+    window.generateSquareQuestion = function() {
+        const diff = formulaEngine.getDifficulty();
+        let min = 1, max = 100;
+        
+        if (diff === 'Easy') { min = 1; max = 20; }
+        else if (diff === 'Medium') { min = 21; max = 50; }
+        else if (diff === 'Hard') { min = 51; max = 100; }
+        
+        let attempts = 0;
+        let num, questionText, answer, type, isMCQ = false, options = [];
+        
+        while (attempts < 50) {
+            num = Math.floor(Math.random() * (max - min + 1)) + min;
+            type = Math.floor(Math.random() * 4) + 1; // 1 to 4
+            
+            if (type === 1) {
+                questionText = `${num}² = ?`;
+                answer = num * num;
+            } else if (type === 2) {
+                questionText = `Which number has square ${num * num}?`;
+                answer = num;
+            } else if (type === 3) {
+                questionText = `${num} × ${num} = ?`;
+                answer = num * num;
+            } else if (type === 4) {
+                questionText = `${num}² = ?`;
+                answer = num * num;
+                isMCQ = true;
+                let opts = new Set([answer]);
+                while(opts.size < 4) {
+                    let offset = (Math.floor(Math.random() * 5) + 1) * 10;
+                    if(Math.random() > 0.5) opts.add(answer + offset);
+                    else if (answer - offset > 0) opts.add(answer - offset);
+                    else opts.add(answer + offset + 5);
+                }
+                options = Array.from(opts).sort(() => Math.random() - 0.5);
+            }
+            
+            if (!formulaEngine.history.has(questionText)) {
+                formulaEngine.history.add(questionText);
+                break;
+            }
+            attempts++;
+        }
+        
+        return {
+            question: questionText,
+            answer: answer,
+            isMCQ: isMCQ,
+            options: options
+        };
+    };
+
+    // =========================================================
+    // CUBES MODULE LOGIC
+    // =========================================================
+
+    const cubesView = document.getElementById('cubes-view');
+    const cubesBtn = document.getElementById('cubes-btn');
+    const cubesBackBtn = document.getElementById('cubes-back-btn');
+    const cubesSelector = document.getElementById('cubes-selector');
+    const cubesSelectorGrid = document.getElementById('cubes-selector-grid');
+    const singleCubeView = document.getElementById('single-cube-view');
+    const singleCubeTitle = document.getElementById('single-cube-title');
+    const singleCubeEquation = document.getElementById('single-cube-equation');
+    const singleCubeTrick = document.getElementById('single-cube-trick');
+    
+    let currentViewCube = null;
+
+    if (cubesBtn) {
+        cubesBtn.addEventListener('click', () => {
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.remove('active');
+                categoriesView.setAttribute('aria-hidden', 'true');
+            }
+            if(cubesView) {
+                cubesView.classList.add('active');
+                cubesView.setAttribute('aria-hidden', 'false');
+                cubesView.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (cubesBackBtn) {
+        cubesBackBtn.addEventListener('click', () => {
+            if(cubesView) {
+                cubesView.classList.remove('active');
+                cubesView.setAttribute('aria-hidden', 'true');
+            }
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.add('active');
+                categoriesView.setAttribute('aria-hidden', 'false');
+            }
+        });
+    }
+
+    if (cubesSelectorGrid) {
+        for (let i = 1; i <= 100; i++) {
+            cubesSelectorGrid.appendChild(createNumberTile(i, showCube));
+        }
+    }
+
+    function showCube(number) {
+        if (number < 1 || number > 100) return;
+        currentViewCube = number;
+        
+        if(cubesSelector) cubesSelector.classList.add('hidden');
+        if(singleCubeView) {
+            singleCubeView.classList.remove('hidden');
+            singleCubeView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        if (singleCubeTitle) singleCubeTitle.textContent = `Cube of ${number}`;
+        if (singleCubeEquation) singleCubeEquation.textContent = `${number}³ = ${number * number * number}`;
+        
+        if (singleCubeTrick) {
+            let trick = '';
+            if (number === 10 || number === 100) {
+                trick = `Memory Trick: Just triple the zeros!`;
+            }
+            if (trick) {
+                singleCubeTrick.textContent = trick;
+                singleCubeTrick.classList.remove('hidden');
+            } else {
+                singleCubeTrick.classList.add('hidden');
+            }
+        }
+    }
+
+    const singleCubeBackBtn = document.getElementById('single-cube-back-btn');
+    if (singleCubeBackBtn) {
+        singleCubeBackBtn.addEventListener('click', () => {
+            if(singleCubeView) singleCubeView.classList.add('hidden');
+            if(cubesSelector) cubesSelector.classList.remove('hidden');
+        });
+    }
+    
+    document.getElementById('cubes-view-btn')?.addEventListener('click', () => {
+        if(singleCubeView) singleCubeView.classList.add('hidden');
+        if(cubesSelector) {
+            cubesSelector.classList.remove('hidden');
+            cubesSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('cube-prev-btn')?.addEventListener('click', () => {
+        if (currentViewCube > 1) showCube(currentViewCube - 1);
+    });
+    
+    document.getElementById('cube-next-btn')?.addEventListener('click', () => {
+        if (currentViewCube < 100) showCube(currentViewCube + 1);
+    });
+    
+    document.getElementById('cube-copy-btn')?.addEventListener('click', () => {
+        if (currentViewCube) {
+            navigator.clipboard.writeText(`${currentViewCube}³ = ${currentViewCube * currentViewCube * currentViewCube}`);
+            showToast("Copied to clipboard!");
+        }
+    });
+
+    const cubeSearch = document.getElementById('cubes-search');
+    if (cubeSearch) {
+        cubeSearch.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 1 && val <= 100) {
+                showCube(val);
+                e.target.value = ''; 
+            }
+        });
+    }
+
+    function startCubePractice() {
+        window.isCubesPracticeMode = true;
+        selectedTopic = 'Cubes';
+        
+        const viewsToHide = ['home-view', 'categories-view', 'cubes-view', 'squares-view'];
+        viewsToHide.forEach(id => {
+            const v = document.getElementById(id);
+            if(v) {
+                v.classList.remove('active');
+                if(id==='home-view') v.classList.add('hidden-view');
+                else v.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        const quizView = document.getElementById('quiz-view');
+        if(quizView) {
+            quizView.classList.add('active');
+            quizView.classList.add('slide-in-up');
+        }
+        document.body.classList.add('quiz-active');
+        
+        resetQuiz();
+    }
+
+    document.getElementById('cubes-practice-btn')?.addEventListener('click', startCubePractice);
+    document.getElementById('start-cube-practice-btn')?.addEventListener('click', startCubePractice);
+
+    window.generateCubeQuestion = function() {
+        const diff = formulaEngine.getDifficulty();
+        let min = 1, max = 100;
+        
+        if (diff === 'Easy') { min = 1; max = 20; }
+        else if (diff === 'Medium') { min = 21; max = 50; }
+        else if (diff === 'Hard') { min = 51; max = 100; }
+        
+        let attempts = 0;
+        let num, questionText, answer, type, isMCQ = false, options = [];
+        
+        while (attempts < 50) {
+            num = Math.floor(Math.random() * (max - min + 1)) + min;
+            type = Math.floor(Math.random() * 3) + 1; // 1 to 3 types for cubes based on prompt examples
+            
+            if (type === 1) {
+                questionText = `What is ${num}³ ?`;
+                answer = num * num * num;
+                isMCQ = true;
+            } else if (type === 2) {
+                questionText = `Which number has cube ${num * num * num}?`;
+                answer = num;
+                isMCQ = true;
+            } else if (type === 3) {
+                questionText = `${num * num * num} is the cube of?`;
+                answer = num;
+                isMCQ = true;
+            }
+            
+            if (isMCQ) {
+                let opts = new Set([answer]);
+                while(opts.size < 4) {
+                    let offset = (Math.floor(Math.random() * 5) + 1);
+                    // For answers that are the cube value (type 1), offset should be large.
+                    if (type === 1) {
+                        offset = offset * num * num; // rough approximation offset
+                    }
+                    if(Math.random() > 0.5) opts.add(answer + offset);
+                    else if (answer - offset > 0) opts.add(answer - offset);
+                    else opts.add(answer + offset + 5);
+                }
+                options = Array.from(opts).sort(() => Math.random() - 0.5);
+            }
+            
+            if (!formulaEngine.history.has(questionText)) {
+                formulaEngine.history.add(questionText);
+                break;
+            }
+            attempts++;
+        }
+        
+        return {
+            question: questionText,
+            answer: answer,
+            isMCQ: isMCQ,
+            options: options
+        };
+    };
+
+    // =========================================================
+    // SQUARE ROOTS MODULE LOGIC
+    // =========================================================
+
+    const squareRootsView = document.getElementById('square-roots-view');
+    const squareRootsBtn = document.getElementById('square-roots-btn');
+    const squareRootsBackBtn = document.getElementById('square-roots-back-btn');
+    const squareRootsSelector = document.getElementById('square-roots-selector');
+    const squareRootsSelectorGrid = document.getElementById('square-roots-selector-grid');
+    const singleSquareRootView = document.getElementById('single-square-root-view');
+    const singleSquareRootTitle = document.getElementById('single-square-root-title');
+    const singleSquareRootEquation = document.getElementById('single-square-root-equation');
+    
+    let currentViewSquareRoot = null;
+    
+    function formatRoot(num) {
+        const root = Math.sqrt(num);
+        return Number.isInteger(root) ? root : parseFloat(root.toFixed(2));
+    }
+
+    if (squareRootsBtn) {
+        squareRootsBtn.addEventListener('click', () => {
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.remove('active');
+                categoriesView.setAttribute('aria-hidden', 'true');
+            }
+            if(squareRootsView) {
+                squareRootsView.classList.add('active');
+                squareRootsView.setAttribute('aria-hidden', 'false');
+                squareRootsView.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (squareRootsBackBtn) {
+        squareRootsBackBtn.addEventListener('click', () => {
+            if(squareRootsView) {
+                squareRootsView.classList.remove('active');
+                squareRootsView.setAttribute('aria-hidden', 'true');
+            }
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.add('active');
+                categoriesView.setAttribute('aria-hidden', 'false');
+            }
+        });
+    }
+
+    if (squareRootsSelectorGrid) {
+        for (let i = 1; i <= 100; i++) {
+            squareRootsSelectorGrid.appendChild(createNumberTile(i, showSquareRoot));
+        }
+    }
+
+    function showSquareRoot(number) {
+        if (number < 1 || number > 100) return;
+        currentViewSquareRoot = number;
+        
+        if(squareRootsSelector) squareRootsSelector.classList.add('hidden');
+        if(singleSquareRootView) {
+            singleSquareRootView.classList.remove('hidden');
+            singleSquareRootView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        if (singleSquareRootTitle) singleSquareRootTitle.textContent = `Square Root of ${number}`;
+        if (singleSquareRootEquation) singleSquareRootEquation.textContent = `√${number} = ${formatRoot(number)}`;
+    }
+
+    const singleSquareRootBackBtn = document.getElementById('single-square-root-back-btn');
+    if (singleSquareRootBackBtn) {
+        singleSquareRootBackBtn.addEventListener('click', () => {
+            if(singleSquareRootView) singleSquareRootView.classList.add('hidden');
+            if(squareRootsSelector) squareRootsSelector.classList.remove('hidden');
+        });
+    }
+    
+    document.getElementById('square-roots-view-btn')?.addEventListener('click', () => {
+        if(singleSquareRootView) singleSquareRootView.classList.add('hidden');
+        if(squareRootsSelector) {
+            squareRootsSelector.classList.remove('hidden');
+            squareRootsSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('square-root-prev-btn')?.addEventListener('click', () => {
+        if (currentViewSquareRoot > 1) showSquareRoot(currentViewSquareRoot - 1);
+    });
+    
+    document.getElementById('square-root-next-btn')?.addEventListener('click', () => {
+        if (currentViewSquareRoot < 100) showSquareRoot(currentViewSquareRoot + 1);
+    });
+    
+    document.getElementById('square-root-copy-btn')?.addEventListener('click', () => {
+        if (currentViewSquareRoot) {
+            navigator.clipboard.writeText(`√${currentViewSquareRoot} = ${formatRoot(currentViewSquareRoot)}`);
+            showToast("Copied to clipboard!");
+        }
+    });
+
+    const squareRootsSearch = document.getElementById('square-roots-search');
+    if (squareRootsSearch) {
+        squareRootsSearch.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 1 && val <= 100) {
+                showSquareRoot(val);
+                e.target.value = ''; 
+            }
+        });
+    }
+
+    function startSquareRootPractice() {
+        window.isSquareRootsPracticeMode = true;
+        selectedTopic = 'Square Roots';
+        
+        const viewsToHide = ['home-view', 'categories-view', 'square-roots-view', 'cubes-view', 'squares-view'];
+        viewsToHide.forEach(id => {
+            const v = document.getElementById(id);
+            if(v) {
+                v.classList.remove('active');
+                if(id==='home-view') v.classList.add('hidden-view');
+                else v.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        const quizView = document.getElementById('quiz-view');
+        if(quizView) {
+            quizView.classList.add('active');
+            quizView.classList.add('slide-in-up');
+        }
+        document.body.classList.add('quiz-active');
+        
+        resetQuiz();
+    }
+
+    document.getElementById('square-roots-practice-btn')?.addEventListener('click', startSquareRootPractice);
+    document.getElementById('start-square-root-practice-btn')?.addEventListener('click', startSquareRootPractice);
+
+    window.generateSquareRootQuestion = function() {
+        const diff = formulaEngine.getDifficulty();
+        let min = 1, max = 100;
+        
+        if (diff === 'Easy') { min = 1; max = 20; }
+        else if (diff === 'Medium') { min = 21; max = 50; }
+        else if (diff === 'Hard') { min = 51; max = 100; }
+        
+        let attempts = 0;
+        let num, questionText, answer, type, isMCQ = true, options = [];
+        
+        while (attempts < 50) {
+            num = Math.floor(Math.random() * (max - min + 1)) + min;
+            type = Math.floor(Math.random() * 4) + 1;
+            
+            // For variety, we can ask different forms just like the examples
+            // We use formatRoot for precision correctly
+            if (type === 1) {
+                questionText = `What is √${num}?`;
+                answer = formatRoot(num);
+            } else if (type === 2) {
+                questionText = `Which number has a square root of ${formatRoot(num)}?`;
+                answer = num;
+            } else if (type === 3) {
+                questionText = `What is √${num} (rounded to 2 decimal places)?`;
+                answer = formatRoot(num);
+            } else {
+                questionText = `√${num} = ?`;
+                answer = formatRoot(num);
+            }
+            
+            let opts = new Set([answer]);
+            while(opts.size < 4) {
+                let offset = (Math.random() * 2).toFixed(2);
+                if (Number.isInteger(answer)) offset = Math.floor(Math.random() * 5) + 1;
+                
+                let val1 = parseFloat((answer + Number(offset)).toFixed(2));
+                let val2 = parseFloat((answer - Number(offset)).toFixed(2));
+                
+                if (Math.random() > 0.5) opts.add(val1);
+                else if (val2 > 0) opts.add(val2);
+                else opts.add(parseFloat((answer + Number(offset) + 1).toFixed(2)));
+            }
+            options = Array.from(opts).sort(() => Math.random() - 0.5);
+            
+            if (!formulaEngine.history.has(questionText)) {
+                formulaEngine.history.add(questionText);
+                break;
+            }
+            attempts++;
+        }
+        
+        return {
+            question: questionText,
+            answer: answer,
+            isMCQ: isMCQ,
+            options: options
+        };
+    };
+
+    // =========================================================
+    // CUBE ROOTS MODULE LOGIC
+    // =========================================================
+
+    const cubeRootsView = document.getElementById('cube-roots-view');
+    const cubeRootsBtn = document.getElementById('cube-roots-btn');
+    const cubeRootsBackBtn = document.getElementById('cube-roots-back-btn');
+    const cubeRootsSelector = document.getElementById('cube-roots-selector');
+    const cubeRootsSelectorGrid = document.getElementById('cube-roots-selector-grid');
+    const singleCubeRootView = document.getElementById('single-cube-root-view');
+    const singleCubeRootTitle = document.getElementById('single-cube-root-title');
+    const singleCubeRootEquation = document.getElementById('single-cube-root-equation');
+    
+    let currentViewCubeRoot = null;
+    
+    function formatCubeRoot(num) {
+        // Need to account for small JS precision issues for exactly perfect cubes (e.g. cbrt of 64 is perfectly 4, but let's be safe)
+        const root = Math.cbrt(num);
+        // Math.round to check if it's extremely close to an integer
+        const rounded = Math.round(root);
+        if (Math.abs(root - rounded) < Number.EPSILON * 100) {
+            return rounded;
+        }
+        return parseFloat(root.toFixed(2));
+    }
+
+    if (cubeRootsBtn) {
+        cubeRootsBtn.addEventListener('click', () => {
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.remove('active');
+                categoriesView.setAttribute('aria-hidden', 'true');
+            }
+            if(cubeRootsView) {
+                cubeRootsView.classList.add('active');
+                cubeRootsView.setAttribute('aria-hidden', 'false');
+                cubeRootsView.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (cubeRootsBackBtn) {
+        cubeRootsBackBtn.addEventListener('click', () => {
+            if(cubeRootsView) {
+                cubeRootsView.classList.remove('active');
+                cubeRootsView.setAttribute('aria-hidden', 'true');
+            }
+            const categoriesView = document.getElementById('categories-view');
+            if(categoriesView) {
+                categoriesView.classList.add('active');
+                categoriesView.setAttribute('aria-hidden', 'false');
+            }
+        });
+    }
+
+    if (cubeRootsSelectorGrid) {
+        for (let i = 1; i <= 100; i++) {
+            cubeRootsSelectorGrid.appendChild(createNumberTile(i, showCubeRoot));
+        }
+    }
+
+    function showCubeRoot(number) {
+        if (number < 1 || number > 100) return;
+        currentViewCubeRoot = number;
+        
+        if(cubeRootsSelector) cubeRootsSelector.classList.add('hidden');
+        if(singleCubeRootView) {
+            singleCubeRootView.classList.remove('hidden');
+            singleCubeRootView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        if (singleCubeRootTitle) singleCubeRootTitle.textContent = `Cube Root of ${number}`;
+        if (singleCubeRootEquation) singleCubeRootEquation.textContent = `∛${number} = ${formatCubeRoot(number)}`;
+    }
+
+    const singleCubeRootBackBtn = document.getElementById('single-cube-root-back-btn');
+    if (singleCubeRootBackBtn) {
+        singleCubeRootBackBtn.addEventListener('click', () => {
+            if(singleCubeRootView) singleCubeRootView.classList.add('hidden');
+            if(cubeRootsSelector) cubeRootsSelector.classList.remove('hidden');
+        });
+    }
+    
+    document.getElementById('cube-roots-view-btn')?.addEventListener('click', () => {
+        if(singleCubeRootView) singleCubeRootView.classList.add('hidden');
+        if(cubeRootsSelector) {
+            cubeRootsSelector.classList.remove('hidden');
+            cubeRootsSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    document.getElementById('cube-root-prev-btn')?.addEventListener('click', () => {
+        if (currentViewCubeRoot > 1) showCubeRoot(currentViewCubeRoot - 1);
+    });
+    
+    document.getElementById('cube-root-next-btn')?.addEventListener('click', () => {
+        if (currentViewCubeRoot < 100) showCubeRoot(currentViewCubeRoot + 1);
+    });
+    
+    document.getElementById('cube-root-copy-btn')?.addEventListener('click', () => {
+        if (currentViewCubeRoot) {
+            navigator.clipboard.writeText(`∛${currentViewCubeRoot} = ${formatCubeRoot(currentViewCubeRoot)}`);
+            showToast("Copied to clipboard!");
+        }
+    });
+
+    const cubeRootsSearch = document.getElementById('cube-roots-search');
+    if (cubeRootsSearch) {
+        cubeRootsSearch.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 1 && val <= 100) {
+                showCubeRoot(val);
+                e.target.value = ''; 
+            }
+        });
+    }
+
+    function startCubeRootPractice() {
+        window.isCubeRootsPracticeMode = true;
+        selectedTopic = 'Cube Roots';
+        
+        const viewsToHide = ['home-view', 'categories-view', 'cube-roots-view', 'square-roots-view', 'cubes-view', 'squares-view'];
+        viewsToHide.forEach(id => {
+            const v = document.getElementById(id);
+            if(v) {
+                v.classList.remove('active');
+                if(id==='home-view') v.classList.add('hidden-view');
+                else v.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        const quizView = document.getElementById('quiz-view');
+        if(quizView) {
+            quizView.classList.add('active');
+            quizView.classList.add('slide-in-up');
+        }
+        document.body.classList.add('quiz-active');
+        
+        resetQuiz();
+    }
+
+    document.getElementById('cube-roots-practice-btn')?.addEventListener('click', startCubeRootPractice);
+    document.getElementById('start-cube-root-practice-btn')?.addEventListener('click', startCubeRootPractice);
+
+    window.generateCubeRootQuestion = function() {
+        const diff = formulaEngine.getDifficulty();
+        let min = 1, max = 100;
+        
+        if (diff === 'Easy') { min = 1; max = 20; }
+        else if (diff === 'Medium') { min = 21; max = 50; }
+        else if (diff === 'Hard') { min = 51; max = 100; }
+        
+        let attempts = 0;
+        let num, questionText, answer, type, isMCQ = true, options = [];
+        
+        while (attempts < 50) {
+            num = Math.floor(Math.random() * (max - min + 1)) + min;
+            type = Math.floor(Math.random() * 4) + 1;
+            
+            if (type === 1) {
+                questionText = `What is ∛${num}?`;
+                answer = formatCubeRoot(num);
+            } else if (type === 2) {
+                questionText = `Which number has a cube root of ${formatCubeRoot(num)}?`;
+                answer = num;
+            } else if (type === 3) {
+                questionText = `What is ∛${num} (rounded to 2 decimal places)?`;
+                answer = formatCubeRoot(num);
+            } else {
+                questionText = `∛${num} = ?`;
+                answer = formatCubeRoot(num);
+            }
+            
+            let opts = new Set([answer]);
+            while(opts.size < 4) {
+                let offset = (Math.random() * 1.5).toFixed(2);
+                if (Number.isInteger(answer)) offset = Math.floor(Math.random() * 5) + 1;
+                
+                let val1 = parseFloat((answer + Number(offset)).toFixed(2));
+                let val2 = parseFloat((answer - Number(offset)).toFixed(2));
+                
+                if (Math.random() > 0.5) opts.add(val1);
+                else if (val2 > 0) opts.add(val2);
+                else opts.add(parseFloat((answer + Number(offset) + 1).toFixed(2)));
+            }
+            options = Array.from(opts).sort(() => Math.random() - 0.5);
+            
+            if (!formulaEngine.history.has(questionText)) {
+                formulaEngine.history.add(questionText);
+                break;
+            }
+            attempts++;
+        }
+        
+        return {
+            question: questionText,
+            answer: answer,
+            isMCQ: isMCQ,
+            options: options
+        };
+    };
 });
