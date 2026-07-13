@@ -59,21 +59,6 @@ The platform is designed to offer a complete ecosystem for mathematical mastery.
 ### Formula Library
 ![Formula Library](README/screenshots/formulas.png)
 
-### Tables
-![Tables](README/screenshots/tables.png)
-
-### Squares
-![Squares](README/screenshots/squares.png)
-
-### Cubes
-![Cubes](README/screenshots/cubes.png)
-
-### Square Roots
-![Square Roots](README/screenshots/square-roots.png)
-
-### Cube Roots
-![Cube Roots](README/screenshots/cube-roots.png)
-
 ### Leaderboard
 ![Leaderboard](README/screenshots/leaderboard.png)
 
