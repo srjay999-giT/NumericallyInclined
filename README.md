@@ -2,6 +2,10 @@
 
 > Master Mental Mathematics Through Unlimited Intelligent Practice.
 
+**[🌐 View Live Demo on GitHub Pages](https://srjay999-giT.github.io/NumericallyInclined/)**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/srjay999-giT/NumericallyInclined)
+
 NumericallyInclined is a lightning-fast, fully client-side mathematics practice platform. Designed to mimic the aesthetics and polish of modern premium tools, it provides a distraction-free environment for students and professionals to master mental math, perfect squares, and complex formulas.
 
 It was built to solve a specific problem in math education: static quizzes run out of questions, and rote memorization fades quickly. By providing the core formula, variables, memory tricks, and common mistakes upfront, learners build intuition before testing their speed and accuracy in high-pressure scenarios.
