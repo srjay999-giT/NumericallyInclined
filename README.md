@@ -2,11 +2,11 @@
 
 > Master Mental Mathematics Through Unlimited Intelligent Practice.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-22C55E?style=for-the-badge&logo=vercel&logoColor=white)](https://numerically-inclined-twoifd2tk-jayla999.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-22C55E?style=for-the-badge&logo=vercel&logoColor=white)](https://numerically-inclined.vercel.app)
 
 ## 🌐 Live Demo
 
-🔗 **Live Website:** https://numerically-inclined-twoifd2tk-jayla999.vercel.app
+🔗 **Live Website:** https://numerically-inclined.vercel.app
 
 NumericallyInclined is a lightning-fast, fully client-side mathematics practice platform. Designed to mimic the aesthetics and polish of modern premium tools, it provides a distraction-free environment for students and professionals to master mental math, perfect squares, and complex formulas.
 
@@ -91,8 +91,12 @@ NumericallyInclined/
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Deployment & Installation
 
+### 🚀 Vercel Deployment
+This project is continuously deployed on **Vercel**. It automatically redeploys whenever changes are pushed to the `main` branch. 
+
+### 💻 Local Development
 Because NumericallyInclined uses zero backend dependencies and no build steps, running it locally is instantaneous.
 
 ```bash
