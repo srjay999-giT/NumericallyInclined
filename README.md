@@ -47,18 +47,44 @@ The platform is designed to offer a complete ecosystem for mathematical mastery.
 
 <br/>
 
-| Section | Screenshot |
-|---------|------------|
-| **Home Page** | `[Placeholder: home.png]` |
-| **Practice** | `[Placeholder: practice.png]` |
-| **Categories** | `[Placeholder: categories.png]` |
-| **Formula Library** | `[Placeholder: formulas.png]` |
-| **Tables** | `[Placeholder: tables.png]` |
-| **Squares** | `[Placeholder: squares.png]` |
-| **Leaderboard** | `[Placeholder: leaderboard.png]` |
-| **Settings** | `[Placeholder: settings.png]` |
-| **Dark Mode** | `[Placeholder: dark_mode.png]` |
-| **Dashboard** | `[Placeholder: dashboard.png]` |
+### Home
+![Home](README/screenshots/home.png)
+
+### Practice
+![Practice](README/screenshots/practice.png)
+
+### Categories
+![Categories](README/screenshots/categories.png)
+
+### Formula Library
+![Formula Library](README/screenshots/formulas.png)
+
+### Tables
+![Tables](README/screenshots/tables.png)
+
+### Squares
+![Squares](README/screenshots/squares.png)
+
+### Cubes
+![Cubes](README/screenshots/cubes.png)
+
+### Square Roots
+![Square Roots](README/screenshots/square-roots.png)
+
+### Cube Roots
+![Cube Roots](README/screenshots/cube-roots.png)
+
+### Leaderboard
+![Leaderboard](README/screenshots/leaderboard.png)
+
+### Settings
+![Settings](README/screenshots/settings.png)
+
+### Dashboard / Progress Heatmap
+![Dashboard](README/screenshots/dashboard.png)
+
+### Dark Mode
+![Dark Mode](README/screenshots/dark-mode.png)
 
 <br/>
 
