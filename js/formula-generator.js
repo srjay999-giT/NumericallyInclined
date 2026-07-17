@@ -12,7 +12,10 @@
         'Ratio & Proportion', 'Average', 'Time & Work', 'Time Speed Distance',
         'Boats & Streams', 'Pipes & Cisterns', 'Mensuration', 'Geometry', 'Number System',
         'Algebra', 'Probability', 'Statistics', 'Permutation & Combination',
-        'Coordinate Geometry', 'Calculus', 'Vectors', 'Matrices', 'Determinants', 'Logarithms'
+        'Coordinate Geometry', 'Calculus', 'Vectors', 'Matrices', 'Determinants', 'Logarithms',
+        'Fractions', 'Decimals', 'Ages', 'HCF & LCM', 'Simplification', 'Linear Equations',
+        'Quadratic Equations', 'Trigonometry', 'Set Theory', 'Square Roots', 'Cubes',
+        'Tables', 'Mixed Arithmetic', 'Pattern Recognition', 'Logical Mathematics'
     ];
     const ALIASES = {
         Math: 'Mixed Practice',
@@ -60,9 +63,13 @@
     }
 
     function build(category, difficulty, question, answer, steps, formula, memoryTrick, offsets) {
+        let finalQuestion = question;
+        if (typeof TemplateEngine !== 'undefined') {
+            finalQuestion = TemplateEngine.get(category, question, difficulty);
+        }
         const numericAnswer = precision(answer);
         return {
-            question,
+            question: finalQuestion,
             answer: numericAnswer,
             options: optionsFor(numericAnswer, offsets),
             difficulty,
@@ -233,12 +240,18 @@
         startSession(category, difficulty) {
             this.category = this.normalizeCategory(category);
             this.history.clear();
-            if (difficulty && DIFFICULTIES.includes(difficulty)) this.difficultyIndex = DIFFICULTIES.indexOf(difficulty);
+            if (difficulty && DIFFICULTIES.includes(difficulty)) {
+                this.difficultyIndex = DIFFICULTIES.indexOf(difficulty);
+                this.lockedDifficulty = true;
+            } else {
+                this.lockedDifficulty = false;
+            }
         }
 
         recordAnswer(correct) {
             this.recentAnswers.push(Boolean(correct));
             if (this.recentAnswers.length > 4) this.recentAnswers.shift();
+            if (this.lockedDifficulty) return this.getDifficulty();
             if (this.recentAnswers.length < 4) return this.getDifficulty();
             const accuracy = this.recentAnswers.filter(Boolean).length / this.recentAnswers.length;
             if (accuracy > 0.9 && this.difficultyIndex < DIFFICULTIES.length - 1) {

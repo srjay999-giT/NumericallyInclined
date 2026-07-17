@@ -15,6 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    window.appDifficulty = localStorage.getItem('difficultyMode') || 'Medium';
+    const radioDifficulty = document.querySelectorAll('input[name="difficultyMode"]');
+    if(radioDifficulty.length > 0) {
+        radioDifficulty.forEach(r => {
+            if (r.value === window.appDifficulty) r.checked = true;
+        });
+    }
+
     if (btnOpenSettings) {
         btnOpenSettings.addEventListener('click', (e) => {
             e.preventDefault();
@@ -33,8 +41,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.appQuizMode = selected.value;
                 localStorage.setItem('quizMode', selected.value);
             }
+            const selectedDiff = document.querySelector('input[name="difficultyMode"]:checked');
+            if(selectedDiff) {
+                window.appDifficulty = selectedDiff.value;
+                localStorage.setItem('difficultyMode', selectedDiff.value);
+                if (typeof updateTimeLimit === 'function') updateTimeLimit();
+            }
             if(settingsModal) settingsModal.setAttribute('aria-hidden', 'true');
             showToast("Settings saved successfully!");
+        });
+    }
+
+    const aboutModal = document.getElementById('about-modal');
+    const btnOpenAbout = document.getElementById('card-about');
+    const btnCloseAbout = document.getElementById('close-about-btn');
+    const btnCloseAboutFooter = document.getElementById('close-about-footer-btn');
+
+    if (btnOpenAbout) {
+        btnOpenAbout.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(aboutModal) aboutModal.setAttribute('aria-hidden', 'false');
+        });
+    }
+    if (btnCloseAbout) {
+        btnCloseAbout.addEventListener('click', () => {
+            if(aboutModal) aboutModal.setAttribute('aria-hidden', 'true');
+        });
+    }
+    if (btnCloseAboutFooter) {
+        btnCloseAboutFooter.addEventListener('click', () => {
+            if(aboutModal) aboutModal.setAttribute('aria-hidden', 'true');
         });
     }
 
@@ -603,7 +639,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Quiz Configuration
     const TOTAL_QUESTIONS = 10;
-    const TIME_LIMIT = 10; // 10 seconds per question
+    let TIME_LIMIT = 10; // 10 seconds per question
+    window.updateTimeLimit = function() {
+        if (window.appDifficulty === 'Easy') TIME_LIMIT = 20;
+        else if (window.appDifficulty === 'Hard') TIME_LIMIT = 7;
+        else if (window.appDifficulty === 'Expert') TIME_LIMIT = 5;
+        else TIME_LIMIT = 10; // Medium
+    };
+    window.updateTimeLimit();
 
     // State Variables
     let currentQuestion = 1;
@@ -1167,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalQuestionsAttempted = 0;
         quizInProgress = true;
         
-        formulaEngine.startSession(selectedTopic);
+        formulaEngine.startSession(selectedTopic, window.appDifficulty);
         
         if(questionNumberEl) questionNumberEl.textContent = `Question ${currentQuestion}/${TOTAL_QUESTIONS}`;
         updateStats();

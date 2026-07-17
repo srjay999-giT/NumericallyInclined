@@ -178,7 +178,7 @@
                         <div class="card-content">
                             <span class="card-text">Practice Mathematics</span>
                             <div class="premium-action-btn">
-                                <i class="fa-solid fa-play"></i> <span>Start</span>
+                                <span class="start-icon-badge"><i class="fa-solid fa-play"></i></span><span>Start</span>
                             </div>
                         </div>
                         <span class="ripple-container"></span>
@@ -278,6 +278,9 @@
                 <nav aria-label="Footer navigation"><a href="#">Terms</a><a href="#">Privacy</a><a
                         href="#">Contact</a><a href="#">GitHub</a></nav>
             </footer>
+            <div
+                style="text-align: center; padding-bottom: 32px; font-size: .8rem; font-weight: 600; color: var(--text-muted); font-family: 'Plus Jakarta Sans', sans-serif;">
+                Made With ❤️ In California, USA 🇺🇸</div>
 
         </main>
     </div>
@@ -748,6 +751,27 @@
                         class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="settings-group">
+                <h3>🎯 Difficulty Mode</h3>
+                <div class="difficulty-group">
+                    <label class="difficulty-option">
+                        <input type="radio" name="difficultyMode" value="Easy">
+                        <span class="difficulty-btn">Easy</span>
+                    </label>
+                    <label class="difficulty-option">
+                        <input type="radio" name="difficultyMode" value="Medium" checked>
+                        <span class="difficulty-btn">Medium</span>
+                    </label>
+                    <label class="difficulty-option">
+                        <input type="radio" name="difficultyMode" value="Hard">
+                        <span class="difficulty-btn">Hard</span>
+                    </label>
+                    <label class="difficulty-option">
+                        <input type="radio" name="difficultyMode" value="Expert">
+                        <span class="difficulty-btn">Expert</span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-group">
                 <h3>📝 Quiz Mode</h3>
                 <label class="setting-radio">
                     <input type="radio" name="quizMode" value="mcq">
@@ -777,6 +801,85 @@
         </div>
     </div>
 
+    <!-- About Modal -->
+    <div id="about-modal" class="modal premium-about-modal" aria-hidden="true">
+        <style>
+            .premium-about-modal .modal-content {
+                background: linear-gradient(135deg, #FFF7ED 0%, #FFE7C2 45%, #FFD4A3 100%) !important;
+                backdrop-filter: blur(18px) !important;
+                -webkit-backdrop-filter: blur(18px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.4) !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 24px !important;
+            }
+
+            .premium-about-modal .modal-header h2 {
+                color: #1F2937 !important;
+                font-weight: 800 !important;
+            }
+
+            .premium-about-modal .settings-group p {
+                color: #4B5563 !important;
+                line-height: 1.6 !important;
+                font-size: 1.1rem !important;
+            }
+
+            .premium-about-badge {
+                background: rgba(255, 255, 255, 0.65);
+                border-radius: 999px;
+                padding: 12px 22px;
+                font-weight: 600;
+                display: inline-block;
+                color: #4B5563;
+                font-size: 0.9rem;
+            }
+
+            .premium-about-modal .modal-header .icon-button {
+                background: #FFFFFF !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 50% !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+                color: #4B5563 !important;
+            }
+
+            .premium-about-modal .modal-header .icon-button:hover {
+                transform: scale(1.05) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .premium-about-modal .modal-footer .primary-btn {
+                background: #FC8019 !important;
+                color: #FFFFFF !important;
+                border-radius: 999px !important;
+                box-shadow: 0 4px 12px rgba(252, 128, 25, 0.2) !important;
+                border: none !important;
+                transition: background 0.2s ease !important;
+            }
+
+            .premium-about-modal .modal-footer .primary-btn:hover {
+                background: #E67315 !important;
+            }
+        </style>
+        <div class="modal-overlay"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>About MyNinjaMaster</h2>
+                <button id="close-about-btn" class="icon-button" aria-label="Close about"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="settings-group" style="text-align: center; padding: 24px 0;">
+                <p style="margin-bottom: 24px; font-family: 'Plus Jakarta Sans', sans-serif;">MyNinjaMaster is a premium
+                    educational platform to test your knowledge across multiple categories. Built for the Joy of
+                    Mathematics.</p>
+                <div class="premium-about-badge" style="font-family: 'Plus Jakarta Sans', sans-serif;">Made With ❤️ In
+                    California, USA 🇺🇸</div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-about-footer-btn" class="primary-btn full-width">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Achievements Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
@@ -787,6 +890,7 @@
         });
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/template-engine.js"></script>\n
     <script src="js/formula-generator.js"></script>
     <script src="js/script.js"></script>
 </body>
