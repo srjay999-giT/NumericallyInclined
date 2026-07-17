@@ -1,14 +1,14 @@
-# NumericallyInclined
+# MyNinjaMaster
 
 > Master Mental Mathematics Through Unlimited Intelligent Practice.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-22C55E?style=for-the-badge&logo=vercel&logoColor=white)](https://numerically-inclined.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-22C55E?style=for-the-badge&logo=vercel&logoColor=white)](https://myninjamaster.vercel.app)
 
 ## 🌐 Live Demo
 
-🔗 **Live Website:** https://numerically-inclined.vercel.app
+🔗 **Live Website:** https://myninjamaster.vercel.app
 
-NumericallyInclined is a lightning-fast, fully client-side mathematics practice platform. Designed to mimic the aesthetics and polish of modern premium tools, it provides a distraction-free environment for students and professionals to master mental math, perfect squares, and complex formulas.
+MyNinjaMaster is a lightning-fast, fully client-side mathematics practice platform. Designed to mimic the aesthetics and polish of modern premium tools, it provides a distraction-free environment for students and professionals to master mental math, perfect squares, and complex formulas.
 
 It was built to solve a specific problem in math education: static quizzes run out of questions, and rote memorization fades quickly. By providing the core formula, variables, memory tricks, and common mistakes upfront, learners build intuition before testing their speed and accuracy in high-pressure scenarios.
 
@@ -77,7 +77,7 @@ The platform is designed to offer a complete ecosystem for mathematical mastery.
 
 ## 🛠 Tech Stack
 
-NumericallyInclined relies on a strict, dependency-free vanilla stack to ensure maximum performance and offline capability.
+MyNinjaMaster relies on a strict, dependency-free vanilla stack to ensure maximum performance and offline capability.
 
 - HTML5
 - CSS3
@@ -89,7 +89,7 @@ NumericallyInclined relies on a strict, dependency-free vanilla stack to ensure 
 ## 📂 Folder Structure
 
 ```text
-NumericallyInclined/
+MyNinjaMaster/
 ├── index.html           # Main SPA entry point
 ├── README.md            # Project documentation
 ├── css/
@@ -108,7 +108,7 @@ NumericallyInclined/
 This project is continuously deployed on **Vercel**. It automatically redeploys whenever changes are pushed to the `main` branch. 
 
 ### 💻 Local Development
-Because NumericallyInclined uses zero backend dependencies and no build steps, running it locally is instantaneous.
+Because MyNinjaMaster uses zero backend dependencies and no build steps, running it locally is instantaneous.
 
 ```bash
 git clone <repository-url>
@@ -168,7 +168,7 @@ We are constantly pushing to make mental math mastery more engaging. Upcoming fe
 - **Daily Challenges:** A synchronized global challenge with unique rule modifiers.
 - **Accounts:** Secure user authentication.
 - **Cloud Sync:** Firebase integration to persist your heatmap across devices.
-- **PWA:** Install NumericallyInclined directly to your mobile home screen.
+- **PWA:** Install MyNinjaMaster directly to your mobile home screen.
 - **Multiplayer:** Real-time 1v1 math duels via WebSockets.
 - **Spaced Repetition:** An algorithm targeting the topics you fail most often.
 - **Voice Practice:** Web Speech API integration to answer questions hands-free.
